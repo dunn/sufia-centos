@@ -20,6 +20,8 @@
     - { role: ruby }
     - { role: hydra-stack }
     - { role: services }
+    #- { role: ffmpeg }
+    #- { role: imagemagick }
     - { role: passenger, sudo: yes }
     - { role: marmotta }
     - { role: app-config, sudo: yes }
