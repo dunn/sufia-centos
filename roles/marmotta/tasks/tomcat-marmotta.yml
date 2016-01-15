@@ -1,0 +1,29 @@
+---
+- name: create marmotta_home
+  file: path={{ marmotta_home }} state=directory
+
+- name: download marmotta
+  get_url: url=http://mirror.cc.columbia.edu/pub/software/apache/marmotta/{{ marmotta_version }}/apache-marmotta-{{ marmotta_version }}-webapp.tar.gz \
+           sha256sum={{ marmotta_sha }} \
+           owner={{ ansible_ssh_user }} group={{ ansible_user_group }} \
+           dest={{ install_path }}/apache-marmotta-{{ marmotta_version }}-webapp.tar.gz
+
+- name: unpack marmotta
+  unarchive: src={{ install_path }}/apache-marmotta-{{ marmotta_version }}-webapp.tar.gz dest={{ install_path }}/ \
+             creates={{ install_path }}/apache-marmotta-{{ marmotta_version }}/marmotta.war copy=no
+
+- name: install marmotta
+  command: cp {{ install_path }}/apache-marmotta-{{ marmotta_version }}/marmotta.war {{ tomcat }}/webapps/marmotta.war \
+           creates={{ tomcat }}/webapps/marmotta.war
+
+- name: set permissions for marmotta_home
+  file: path={{ marmotta_home }} owner=marmotta group=marmotta mode=0755 state=directory recurse=yes
+  when: ansible_system == "Linux"
+
+- name: set marmotta system config properties (linux)
+  template: src=system-config.properties.j2 dest={{ marmotta_home }}/system-config.properties \
+            owner=tomcat group=tomcat backup=no mode=0600
+  when: ansible_system == "Linux"
+
+- name: set marmotta system config properties (osx)
+  template: src=system-config.properties.j2 dest={{ marmotta_home }}/system-config.properties mode=0600
