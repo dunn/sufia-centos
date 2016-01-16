@@ -29,9 +29,4 @@
     - { role: smtp }
     - { role: ldap }
     - { role: hostname }
-    # alex2 project needs
-    # ezid.yml (ezid role)
-    # smtp.yml (smtp role)
-    # fedora.yml (hydra-stack role)
-    # ldap.yml (ldap role)
-    # config/environments/production.rb (hostname role)
+    - { role: deploy, repo: "https://github.com/curationexperts/alexandria-v2.git" }
