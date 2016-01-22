@@ -29,3 +29,4 @@
     - { role: ldap }
     - { role: hostname }
     - { role: deploy, repo: "https://github.library.ucsb.edu/ADRL/alexandria.git" }
+    - { role: sshd }

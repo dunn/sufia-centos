@@ -7,7 +7,7 @@
 - hosts: ec2hosts
   name: configuration
   user: centos
-  gather_facts: true  
+  gather_facts: true
   vars:
     ec2_vol_1: "{{ hostvars['localhost'].ec2_vol }}"
   roles:
@@ -19,3 +19,4 @@
     - { role: passenger, sudo: yes }
     - { role: marmotta }
     - { role: app-config, sudo: yes }
+    - { role: sshd }
