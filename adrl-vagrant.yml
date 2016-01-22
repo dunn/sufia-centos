@@ -2,20 +2,19 @@
   hosts: vagrant
   remote_user: vagrant
   vars:
-      capistrano_user: vagrant
-      capistrano_group: vagrant
-      # Add keys to the list below for anyone who will cap deploy to the vm
-      # see http://docs.ansible.com/ansible/authorized_key_module.html
-      capistrano_keys:
-          - https://github.com/acozine.keys
-          - https://github.com/mark-dce.keys
-      install_path: /opt/install
-      project_name: alex2
-      rails_env: production
-      server_name: vagrant.localhost
-      solr_context: hydra
+    capistrano_user: vagrant
+    capistrano_group: vagrant
+    # Add keys to the list below for anyone who will cap deploy to the vm
+    # see http://docs.ansible.com/ansible/authorized_key_module.html
+    capistrano_keys:
+      - https://github.com/dunn.keys
+    install_path: /opt/install
+    project_name: alexandria-v2
+    rails_env: production
+    server_name: 127.0.0.1
+    solr_context: hydra
   roles:
-    - { role: vagrant, sudo: yes }
+    #- { role: vagrant, sudo: yes }
     - { role: housekeeping, sudo: yes }
     - { role: ruby }
     - { role: hydra-stack }
@@ -29,4 +28,4 @@
     - { role: smtp }
     - { role: ldap }
     - { role: hostname }
-    - { role: deploy, repo: "https://github.com/curationexperts/alexandria-v2.git" }
+    - { role: deploy, repo: "https://github.library.ucsb.edu/ADRL/alexandria.git" }
