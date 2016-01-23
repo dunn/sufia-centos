@@ -28,5 +28,5 @@
     - { role: smtp }
     - { role: ldap }
     - { role: hostname }
-    - { role: deploy, repo: "https://github.library.ucsb.edu/ADRL/alexandria.git" }
+    - { role: deploy, repo: "https://github.com/curationexperts/alexandria-v2.git" }
     - { role: sshd }

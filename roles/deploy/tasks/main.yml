@@ -17,14 +17,15 @@
 
 - name: add public key to deploy user
   become: yes
-  authorized_key: 
-      user: "{{ capistrano_user }}" 
+  authorized_key:
+      user: "{{ capistrano_user }}"
       key: "{{ public_key.content | b64decode }}"
 
-- name: clone repo 
-  git: 
+- name: clone repo
+  git:
       repo: "{{ repo }}"
       dest: /home/{{ ansible_ssh_user }}/{{ project_name }}
+      accept_hostkey: True
 
 - name: setup repo - i.e. bundle install
   shell: bundle install chdir=/home/{{ ansible_ssh_user }}/{{ project_name }}
