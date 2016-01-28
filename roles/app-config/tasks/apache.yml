@@ -10,6 +10,4 @@
 
 - name: set apache to restart on reboot
   sudo: yes
-  service: name=httpd enabled=yes
-
-
+  service: name=httpd enabled=yes state=restarted
