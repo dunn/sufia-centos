@@ -4,8 +4,11 @@
   yum: name=unzip state=present
 
 - name: download fits zip
-  get_url: url={{ fits_url }} owner={{ ansible_ssh_user }} group={{ ansible_ssh_user }} dest={{ install_path }}/fits-{{ fits_version }}.zip
-  
+  get_url: url=http://projects.iq.harvard.edu/files/fits/files/fits-{{ fits_ver }}.zip \
+           owner={{ ansible_ssh_user }} group={{ ansible_ssh_user }} \
+           sha256sum={{ fits_sha }}
+           dest={{ install_path }}/fits-{{ fits_version }}.zip
+
 - name: unpack fits
   unarchive: src={{ install_path }}/fits-{{ fits_version }}.zip dest={{ install_path }}/ creates={{ install_path }}/fits-{{ fits_version }}/fits.sh copy=no
 
