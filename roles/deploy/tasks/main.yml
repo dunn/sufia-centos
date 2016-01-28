@@ -18,7 +18,7 @@
 - name: add public key to deploy user
   become: yes
   authorized_key:
-      user: "{{ capistrano_user }}"
+      user: "{{ deploy_user }}"
       key: "{{ public_key.content | b64decode }}"
 
 - name: clone repo
