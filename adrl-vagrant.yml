@@ -6,12 +6,16 @@
     capistrano_group: vagrant
     # Add keys to the list below for anyone who will cap deploy to the vm
     # see http://docs.ansible.com/ansible/authorized_key_module.html
-    capistrano_keys:
-      - https://github.com/dunn.keys
-    install_path: /opt/install
-    project_name: alexandria-v2
+    deploy_user: deploy
+    deploy_group: deploy
+    deploy_keys:
+      - keyfile: "{{ lookup('env', 'IDENTITY') }}.pub"
+    project_dir: /opt
+    project_name: alex2
+    install_path: "{{ project_dir }}/install"
     rails_env: production
     server_name: 127.0.0.1
+    config_path: "{{ project_dir }}/{{ project_name }}/shared/config"
     solr_context: hydra
   roles:
     #- { role: vagrant, sudo: yes }
