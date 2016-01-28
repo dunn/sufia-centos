@@ -4,3 +4,9 @@ solr_context: hydra
 base_path: prod
 deploy_user: deploy
 deploy_group: deploy
+
+solr_ver: 4.10.4
+solr_sha: ac3543880f1b591bcaa962d7508b528d7b42e2b5548386197940b704629ae851
+
+fedora_ver: 4.4.0
+fedora_sha: b9781a38227b71bb2f61d09938f15d5621d57edcfb94db5e9524abcac6984b14
