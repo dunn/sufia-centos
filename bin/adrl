@@ -1,0 +1,251 @@
+#!/usr/bin/env bash
+
+if [[ "$1" != "vagrant" &&
+      "$1" != "development" &&
+      "$1" != "production" ]]; then
+  echo "$(tput setaf 124)Bad argument:$(tput sgr0) $1"
+  echo "Usage: bin/create <development|production>"
+  exit 1
+fi
+
+#
+# Functions
+#
+
+# @param [String] The hash length (256, 512, etc.)
+mkpasswd() {
+  openssl rand -base64 64 | shasum -a "$1" | tr -d '\n\ -'
+}
+
+# Pretty-prints and runs a command, exiting when there's non-zero output
+run_cmd() {
+  local cmd
+  cmd="$*"
+  echo "$(tput bold)==> $*$(tput sgr0)"
+  eval "$cmd"
+
+  export EXIT_STATUS=$?
+
+  if [ "$EXIT_STATUS" != "0" ]; then
+    echo "$(tput setaf 124)Failed ($EXIT_STATUS):$(tput sgr0) $cmd"
+    exit "$EXIT_STATUS"
+  fi
+}
+
+# Write the configuration variables so Ansible can be re-run on failure
+#
+# FIXME: even though it's deleted after a successful provision, this
+# is still probably unwise.
+write_savepoint() {
+  cat <<EOF
+#!/bin/bash
+export EMAIL='$EMAIL'
+export EZID_PASS='$EZID_PASS'
+export EZID_SHOULDER='$EZID_SHOULDER'
+export EZID_USER='$EZID_USER'
+export FEDORA_PASS='$FEDORA_PASS'
+export H_PG_PASS='$H_PG_PASS'
+export IDENTITY='$IDENTITY'
+export LDAP_PASS='$LDAP_PASS'
+export M_PG_PASS='$M_PG_PASS'
+export PG_PASS='$PG_PASS'
+export PLAYBOOK='$PLAYBOOK'
+export PORT='$PORT'
+export REMOTE_USER='$REMOTE_USER'
+export REMOTE_GROUP='$REMOTE_GROUP'
+export SECRET='$SECRET'
+export SERVER='$SERVER'
+export STASH_PASS='$STASH_PASS'
+export STASH_USER='$STASH_USER'
+export SUDO_FLAG='$SUDO_FLAG'
+export SVM_PASS='$SVM_PASS'
+export SVM_USER='$SVM_USER'
+EOF
+}
+
+write_hosts() {
+  cat <<EOF
+[adrl-hosts]
+alex2 ansible_ssh_port=$PORT ansible_ssh_host=$SERVER
+EOF
+}
+
+write_conf() {
+cat <<EOF
+[defaults]
+private_key_file = $IDENTITY
+host_key_checking = False
+control_path = %(directory)s/%%h-%%r
+inventory = $(pwd)/hosts
+
+[ssh_connection]
+scp_if_ssh=True
+EOF
+}
+
+NOW="$(date "+%Y-%m-%d-%H%M%S")"
+export NOW
+
+# If they pass a config file from a previous try, source it and don't
+# prompt them for new parameters
+if [ -f "$2" ]; then
+  # shellcheck source=/dev/null
+  . "$2"
+else
+  #
+  # Set variables
+  #
+  export PLAYBOOK=adrl-vagrant.yml
+
+  # These variables are stored in secrets.yml, so we can SSH and check
+  # them if need be.
+  #
+  # FIXME: store them in Secret Server and fetch via the API at run-time
+  SECRET="$(mkpasswd 512)"
+  export SECRET
+
+  FEDORA_PASS="$(mkpasswd 256)"
+  export FEDORA_PASS
+
+  PG_PASS="$(mkpasswd 256)"
+  export PG_PASS
+  H_PG_PASS="$(mkpasswd 256)"
+  export H_PG_PASS
+  M_PG_PASS="$(mkpasswd 256)"
+  export M_PG_PASS
+
+  ANSIBLE_CONFIG="$(pwd)/ansible.cfg"
+  export ANSIBLE_CONFIG
+
+  if [ "$1" == "production" ]; then
+    export PORT=22
+  else
+    export PORT=2222
+  fi
+
+  REMOTE_USER=${REMOTE_USER:-"vagrant"}
+  REMOTE_GROUP="$REMOTE_USER"
+  if [ "$1" == "production" ]; then
+    echo -n "Set REMOTE_USER (default 'root'): "
+    read -r REMOTE_USER
+    REMOTE_USER=${REMOTE_USER:-"root"}
+    REMOTE_GROUP="$REMOTE_USER"
+  fi
+  echo "Setting REMOTE_USER to '$REMOTE_USER'"
+  export REMOTE_USER
+  export REMOTE_GROUP
+
+  echo -n "Specify path to identity file (default ~/.ssh/id_rsa): "
+  read -r -e IDENTITY
+  IDENTITY=${IDENTITY:-"$HOME/.ssh/id_rsa"}
+  export IDENTITY
+
+  if [ "$1" == "production" ]; then
+    echo -n "Prompt for sudo password? [Y/n]: "
+    read -r sudopass
+    sudopass=${sudopass:-"n"}
+    if [ "$sudopass" == "Y" ] || [ "$sudopass" == "y" ]; then
+      export SUDO_FLAG=" -K"
+    fi
+  fi
+
+  SERVER=${SERVER:-"localhost"}
+  if [ "$1" == "production" ]; then
+    echo -n "Set SERVER: "
+    read -r SERVER
+  fi
+  echo "Setting SERVER to '$SERVER'"
+  export SERVER
+
+  if [ "$IDENTITY" != "" ]; then ID_FLAG="-i $IDENTITY"; fi
+  export ssh_cmd="ssh $ID_FLAG -p $PORT $REMOTE_USER@$SERVER"
+
+  echo -n "Enter password for the LDAP server: "
+  read -r -s LDAP_PASS
+  export LDAP_PASS
+
+  echo
+  echo -n "Enter Ezid username: "
+  read -r EZID_USER
+  echo "Setting EZID_USER to '$EZID_USER'"
+  export EZID_USER
+
+  echo -n "Enter password for Ezid: "
+  read -r -s EZID_PASS
+  export EZID_PASS
+
+  if [ "$1" == "production" ]; then
+    echo
+    echo -n "Enter shoulder for Ezid: "
+    read -r EZID_SHOULDER
+    echo "Setting EZID_SHOULDER to '$EZID_SHOULDER'"
+  else
+    EZID_SHOULDER='ark:/99999/fk4'
+    echo
+  fi
+  export EZID_SHOULDER
+
+  echo -n "Enter username for cloning from Stash/GH Enterprise: "
+  read -r STASH_USER
+  echo "Setting STASH_USER to '$STASH_USER'"
+  export STASH_USER
+
+  echo -n "Enter AD password for $STASH_USER: "
+  read -r -s STASH_PASS
+  export STASH_PASS
+
+  echo
+  echo -n "Enter Active Directory username for mounting SVM: "
+  read -r SVM_USER
+  echo "Setting SVM_USER to '$SVM_USER'"
+  export SVM_USER
+
+  echo -n "Enter AD password for $SVM_USER: "
+  read -r -s SVM_PASS
+  export SVM_PASS
+
+  echo
+  echo -n "Enter the contact form email address: "
+  read -r EMAIL
+  echo "Setting EMAIL to '$EMAIL'"
+  export EMAIL
+
+  write_savepoint > "$1$NOW.log"
+  chmod 600 "$1$NOW.log"
+fi
+
+git clone "https://github.com/curationexperts/alexandria-v2.git" $PROJECT_NAME
+
+if [ "$1" == "production" ]; then
+  write_hosts > hosts
+  write_conf > ansible.cfg
+  run_cmd "ansible-playbook adrl-prod.yml -vv -u $REMOTE_USER$SUDO_FLAG"
+  if [ "$EXIT_STATUS" == "0" ]; then
+    rm -f $1*.log
+    echo "Provisioning complete."
+    echo
+    echo "Run \`SERVER=$SERVER make prod\` from the repository to deploy with Capistrano."
+  else
+    echo "$(tput bold)==> Configuration saved to $1$NOW.log$(tput sgr0)"
+    echo 'Re-run with `bin/create production'" $1$NOW.log"'`'", or delete it NOW."
+  fi
+
+elif [ "$1" == "vagrant" ] || [ "$1" == "development" ]; then
+
+  if [ "$2" == "" ]; then
+    run_cmd "vagrant up"
+  else
+    run_cmd "vagrant provision"
+  fi
+
+  if [ "$EXIT_STATUS" == "0" ]; then
+    rm -f $1*.log
+    echo "Provisioning complete."
+    echo
+    echo "Run \`make vagrant\` from the repository to deploy with Capistrano."
+    echo
+  else
+    echo "$(tput bold)==> Configuration saved to $1$NOW.log$(tput sgr0)"
+    echo 'Re-run with `bin/create development'" $1$NOW.log"'`'", or delete it NOW."
+  fi
+fi

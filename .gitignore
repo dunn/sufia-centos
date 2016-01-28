@@ -1,0 +1,8 @@
+.bundle
+alexandria-v2
+*.log
+.vagrant
+
+# created by bin/provision
+ansible.cfg
+hosts

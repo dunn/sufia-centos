@@ -1,30 +1,67 @@
-- name: provision basic alex2 vagrant box
-  hosts: vagrant
+- name: ADRL Vagrant
+  hosts: all
   remote_user: vagrant
   vars:
-    capistrano_user: vagrant
-    capistrano_group: vagrant
-    # Add keys to the list below for anyone who will cap deploy to the vm
-    # see http://docs.ansible.com/ansible/authorized_key_module.html
     deploy_user: deploy
     deploy_group: deploy
-    deploy_keys:
-      - keyfile: "{{ lookup('env', 'IDENTITY') }}.pub"
+    keyfile: "{{ lookup('env', 'IDENTITY') }}.pub"
+
+    server_name: "{{ lookup('env', 'SERVER') }}"
     project_dir: /opt
     project_name: alex2
     install_path: "{{ project_dir }}/install"
+
     rails_env: production
-    server_name: 127.0.0.1
+    rails_secret_key_base: "{{ lookup('env', 'SECRET') }}"
     config_path: "{{ project_dir }}/{{ project_name }}/shared/config"
+
+    tomcat: /usr/share/tomcat
     solr_context: hydra
+    solr_home: "{{ project_dir }}/solr"
+    marmotta_home: "{{ project_dir }}/marmotta"
+
+    # Password for the 'postgres' user
+    pg_pass: "{{ lookup('env', 'PG_PASS') }}"
+    # Passwords for hydra and marmotta roles
+    hydra_pg_pass: "{{ lookup('env', 'H_PG_PASS') }}"
+    marmotta_pg_pass: "{{ lookup('env', 'M_PG_PASS') }}"
+
+    fedora_pass: "{{ lookup('env', 'FEDORA_PASS') }}"
+
+    # DCE's is available in Secret Server
+    ldap_admin_pass: "{{ lookup('env', 'LDAP_PASS') }}"
+
+    contact_email: "{{ lookup('env', 'EMAIL') }}"
+
+    # SMTP
+    smtp_address: sendmail-relay-2476.library.ucsb.edu
+    smtp_port: 25
+    smtp_user: "{{ lookup('env', 'SMTP_USER') }}"
+    # leave blank
+    smtp_domain:
+    smtp_password:
+
+    # Active Directory login; this is used to mount the data folders
+    # from svmwindows and to clone the metadata repository from Stash
+    svm_user: "{{ lookup('env', 'SVM_USER') }}"
+    svm_pass: "{{ lookup('env', 'SVM_PASS') }}"
+
+    # AD credentials for Stash
+    stash_user: "{{ lookup('env', 'STASH_USER') }}"
+    stash_pass: "{{ lookup('env', 'STASH_PASS') }}"
+
+    ezid_user: "{{ lookup('env', 'EZID_USER') }}"
+    ezid_pass: "{{ lookup('env', 'EZID_PASS') }}"
+    ezid_default_shoulder: "{{ lookup('env', 'EZID_SHOULDER') }}"
+
   roles:
-    #- { role: vagrant, sudo: yes }
+    # - { role: vagrant, sudo: yes }
     - { role: housekeeping, sudo: yes }
     - { role: ruby }
     - { role: hydra-stack }
     - { role: services }
-    #- { role: ffmpeg }
-    #- { role: imagemagick }
+    # - { role: ffmpeg }
+    # - { role: imagemagick }
     - { role: passenger, sudo: yes }
     - { role: marmotta }
     - { role: app-config, sudo: yes }
@@ -32,5 +69,5 @@
     - { role: smtp }
     - { role: ldap }
     - { role: hostname }
-    - { role: deploy, repo: "https://github.com/curationexperts/alexandria-v2.git" }
+    # - { role: deploy, repo: "https://github.com/curationexperts/alexandria-v2.git" }
     - { role: sshd }

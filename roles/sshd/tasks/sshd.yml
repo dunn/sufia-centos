@@ -1,6 +1,7 @@
 ---
 - name: update sshd config
-  template: src=ssh_config dest=/etc/ssh/sshd_config backup=yes
+  copy: src=sshd_config dest=/etc/ssh/sshd_config backup=yes
+  sudo: yes
   notify:
   - restart ssh service
 

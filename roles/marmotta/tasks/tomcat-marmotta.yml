@@ -4,30 +4,31 @@
   sudo: yes
 
 - name: create marmotta user
-  user: name={{ marmotta_user }} group={{ marmotta_group }} shell=/bin/bash home=/opt/marmotta createhome=yes state=present
+  user: name={{ marmotta_user }} group={{ marmotta_group }} shell=/bin/bash \
+        home={{ project_dir }}/marmotta createhome=yes state=present
   sudo: yes
 
 - name: create marmotta_home
   file: path={{ marmotta_home }} state=directory
 
 - name: download marmotta
-  get_url: url=http://mirror.cc.columbia.edu/pub/software/apache/marmotta/{{ marmotta_version }}/apache-marmotta-{{ marmotta_version }}-webapp.tar.gz \
+  get_url: url=http://mirror.cc.columbia.edu/pub/software/apache/marmotta/{{ marmotta_ver }}/apache-marmotta-{{ marmotta_ver }}-webapp.tar.gz \
            sha256sum={{ marmotta_sha }} \
            owner={{ ansible_ssh_user }} group={{ ansible_ssh_user }} \
-           dest={{ install_path }}/apache-marmotta-{{ marmotta_version }}-webapp.tar.gz
+           dest={{ install_path }}/apache-marmotta-{{ marmotta_ver }}-webapp.tar.gz
 
 - name: unpack marmotta
-  unarchive: src={{ install_path }}/apache-marmotta-{{ marmotta_version }}-webapp.tar.gz dest={{ install_path }}/ \
-             creates={{ install_path }}/apache-marmotta-{{ marmotta_version }}/marmotta.war copy=no
+  unarchive: src={{ install_path }}/apache-marmotta-{{ marmotta_ver }}-webapp.tar.gz dest={{ install_path }}/ \
+             creates={{ install_path }}/apache-marmotta-{{ marmotta_ver }}/marmotta.war copy=no
 
 - name: install marmotta
   become: yes
-  command: cp {{ install_path }}/apache-marmotta-{{ marmotta_version }}/marmotta.war /var/lib/tomcat/webapps/marmotta.war \
-           creates=/var/lib/tomcat/webapps/marmotta.war
+  command: cp {{ install_path }}/apache-marmotta-{{ marmotta_ver }}/marmotta.war {{ tomcat }}/webapps/marmotta.war \
+           creates={{ tomcat }}/webapps/marmotta.war
 
 - name: set ownership on marmotta.war
   become: yes
-  command: chown tomcat:tomcat /var/lib/tomcat/webapps/marmotta.war
+  command: chown tomcat:tomcat {{ tomcat }}/webapps/marmotta.war
 
 - name: set permissions for marmotta_home
   become: yes
@@ -40,16 +41,16 @@
 
 # Currently Marmotta tries to install a
 # logging library that conflicts with Solr's, so for now we're just
-# removing that library. 
+# removing that library.
 # Check - is the library installed before Marmotta runs?
 # If not, restart tomcat after installing Marmotta, then remove
 # the library, then restart Tomcat again.
 
-#- name: remove log4j-over-slf4j.jar
-#  file: path={{ item }} state=absent
-#  become: yes
-#  with_items:
-#    - /var/lib/tomcat/webapps/marmotta/WEB-INF/lib/log4j-over-slf4j-1.7.7.jar
+- name: remove log4j-over-slf4j.jar
+  file: path={{ item }} state=absent
+  become: yes
+  with_items:
+    - "{{ tomcat }}/webapps/marmotta/WEB-INF/lib/log4j-over-slf4j-1.7.7.jar"
 
 - name: restart tomcat
   become: yes

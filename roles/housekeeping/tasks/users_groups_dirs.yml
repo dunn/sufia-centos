@@ -20,5 +20,4 @@
     - /home/{{ deploy_user }}/.ssh
 
 - name: add keys for capistrano user
-  authorized_key: user={{ deploy_user }} key="{{ item }}"
-  with_items: "{{ deploy_keys }}"
+  authorized_key: user={{ deploy_user }} key={{ lookup('file', keyfile) }}

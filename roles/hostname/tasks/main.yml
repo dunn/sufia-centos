@@ -5,7 +5,10 @@
   file: path={{ config_path }}/environments \
         owner={{ deploy_user }} group={{ deploy_group }} state=directory
 
-- name: add shared config/environments/production.rb
+- name: add environments configs
   become: yes
-  template: src=production.rb.j2 dest={{ config_path }}/environments/production.rb \
+  template: src={{ item }}.rb.j2 dest={{ config_path }}/environments/{{ item }}.rb \
             owner={{ deploy_user }} group={{ deploy_group }} backup=no
+  with_items:
+    - production
+    - test
