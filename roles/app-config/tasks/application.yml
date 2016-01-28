@@ -1,0 +1,7 @@
+---
+- name: install config templates
+  become: yes
+  template: src={{ item }}.j2 dest={{ config_path }}/{{ item }}
+  with_items:
+    - application.yml
+    - environment.rb

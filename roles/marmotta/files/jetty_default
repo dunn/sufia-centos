@@ -1,2 +1,2 @@
-MARMOTTA_HOME=/opt/marmotta
+MARMOTTA_HOME={{ marmotta_home }}
 JETTY_USER=marmotta
