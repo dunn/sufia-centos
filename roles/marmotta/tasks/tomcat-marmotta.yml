@@ -32,12 +32,10 @@
 
 - name: set permissions for marmotta_home
   file: path={{ marmotta_home }} owner=marmotta group=marmotta mode=0755 state=directory recurse=yes
-  when: ansible_system == "Linux"
 
 - name: set marmotta system config properties (linux)
   template: src=system-config.properties.j2 dest={{ marmotta_home }}/system-config.properties \
             owner=tomcat group=tomcat backup=no mode=0600
-  when: ansible_system == "Linux"
 
 - name: set marmotta system config properties (osx)
   template: src=system-config.properties.j2 dest={{ marmotta_home }}/system-config.properties mode=0600
