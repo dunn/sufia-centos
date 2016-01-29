@@ -39,6 +39,12 @@
   template: src=system-config.properties.j2 dest={{ marmotta_home }}/system-config.properties \
             owner=tomcat group=tomcat backup=no mode=0600
 
+- name: restart tomcat
+  become: yes
+  service: name=tomcat enabled=yes state=restarted
+
+- wait_for: port=8080
+
 # Currently Marmotta tries to install a
 # logging library that conflicts with Solr's, so for now we're just
 # removing that library.
