@@ -1,2 +1,10 @@
+default: &default
+  adapter: solr
+
+test:
+  url: http://localhost:8983/solr
+  <<: *default
+
 production:
   url: http://127.0.0.1:8080/{{ solr_context }}
+  <<: *default
