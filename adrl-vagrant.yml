@@ -29,5 +29,5 @@
     - { role: smtp }
     - { role: ldap }
     - { role: hostname }
-    # - { role: deploy, repo: "https://github.com/curationexperts/alexandria-v2.git" }
+    - { role: adrl-metadata, sudo: yes }
     - { role: sshd }

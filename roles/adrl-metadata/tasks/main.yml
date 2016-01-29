@@ -1,0 +1,3 @@
+---
+- include: adrl-dm.yml
+- include: automount.yml
