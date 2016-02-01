@@ -1,12 +1,10 @@
 ---
 - name: create marmotta group
   group: name={{ marmotta_group }} state=present
-  sudo: yes
 
 - name: create marmotta user
   user: name={{ marmotta_user }} group={{ marmotta_group }} shell=/bin/bash \
         home={{ project_dir }}/marmotta createhome=yes state=present
-  sudo: yes
 
 - name: create marmotta_home
   file: path={{ marmotta_home }} state=directory
@@ -22,29 +20,23 @@
              creates={{ install_path }}/apache-marmotta-{{ marmotta_ver }}/marmotta.war copy=no
 
 - name: install marmotta
-  become: yes
   command: cp {{ install_path }}/apache-marmotta-{{ marmotta_ver }}/marmotta.war {{ tomcat }}/webapps/marmotta.war \
            creates={{ tomcat }}/webapps/marmotta.war
 
 - name: set ownership on marmotta.war
-  become: yes
   command: chown tomcat:tomcat {{ tomcat }}/webapps/marmotta.war
 
 - name: set permissions for marmotta_home
   file: path={{ marmotta_home }} owner=marmotta group=marmotta mode=0755 state=directory recurse=yes
 
-- name: set marmotta system config properties (linux)
+- name: set marmotta system config properties
   template: src=system-config.properties.j2 dest={{ marmotta_home }}/system-config.properties \
             owner=tomcat group=tomcat backup=no mode=0600
 
-- name: set marmotta system config properties (osx)
-  template: src=system-config.properties.j2 dest={{ marmotta_home }}/system-config.properties mode=0600
-
 - name: restart tomcat
-  become: yes
   service: name=tomcat enabled=yes state=restarted
 
-- wait_for: port=8080
+- wait_for: path={{ tomcat }}/webapps/marmotta/WEB-INF/lib/log4j-over-slf4j-1.7.7.jar
 
 # Currently Marmotta tries to install a
 # logging library that conflicts with Solr's, so for now we're just
@@ -55,9 +47,11 @@
 
 - name: remove log4j-over-slf4j.jar
   file: path={{ item }} state=absent
-  become: yes
   with_items:
     - "{{ tomcat }}/webapps/marmotta/WEB-INF/lib/log4j-over-slf4j-1.7.7.jar"
+
+# Otherwise subsequent runs will hang on the "wait_for" above
+- file: path={{ tomcat }}/webapps/marmotta/WEB-INF/lib/log4j-over-slf4j-1.7.7.jar state=touch
 
 - name: restart tomcat
   service: name=tomcat enabled=yes state=restarted
