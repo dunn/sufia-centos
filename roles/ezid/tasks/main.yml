@@ -4,3 +4,19 @@
   become: yes
   template: src=ezid.yml.j2 dest={{ config_path }}/ezid.yml \
             owner={{ deploy_user }} group={{ deploy_group }} backup=no
+
+# encoding the YAML replacement in base64 since colons in YAML strings cause problems
+- name: write Ezid user to secrets file
+  become: yes
+  shell: sed -i "$(echo 'L1woZGVmYXVsdDpcIFwmZGVmYXVsdFwpL2NkZWZhdWx0OlwgXCZkZWZhdWx0XG5cIFwgZXppZF91c2VyOlwgCg==' | base64 -d)$(echo '{{ ezid_user }}')" \
+         {{ project_base }}/{{ project_name }}/shared/config/secrets.yml
+
+- name: write Ezid password to secrets file
+  become: yes
+  shell: sed -i "$(echo 'L1woZGVmYXVsdDpcIFwmZGVmYXVsdFwpL2NkZWZhdWx0OlwgXCZkZWZhdWx0XG5cIFwgZXppZF9wYXNzOlwgCg==' | base64 -d)$(echo '{{ ezid_user }}')" \
+         {{ project_base }}/{{ project_name }}/shared/config/secrets.yml
+
+- name: write Ezid shoulder to secrets file
+  become: yes
+  shell: sed -i "$(echo 'L1woZGVmYXVsdDpcIFwmZGVmYXVsdFwpL2NkZWZhdWx0OlwgXCZkZWZhdWx0XG5cIFwgZXppZF9kZWZhdWx0X3Nob3VsZGVyOlwgCg==' | base64 -d)$(echo '{{ ezid_default_shoulder }}')" \
+         {{ project_base }}/{{ project_name }}/shared/config/secrets.yml
