@@ -4,3 +4,14 @@
   become: yes
   template: src=ldap.yml.j2 dest={{ config_path }}/ldap.yml \
             owner={{ deploy_user }} group={{ deploy_group }} backup=no
+
+# encoding the YAML replacement in base64 since colons in YAML strings cause problems
+- name: write LDAP user to secrets file
+  become: yes
+  shell: sed -i "$(echo 'L1woZGVmYXVsdDpcIFwmZGVmYXVsdFwpL2NkZWZhdWx0OlwgXCZkZWZhdWx0XG5cIFwgbGRhcF91c2VyOlwgCg==' | base64 -d)$(echo '{{ ldap_admin_user }}')" \
+         {{ project_base }}/{{ project_name }}/shared/config/secrets.yml
+
+- name: write LDAP password to secrets file
+  become: yes
+  shell: sed -i "$(echo 'L1woZGVmYXVsdDpcIFwmZGVmYXVsdFwpL2NkZWZhdWx0OlwgXCZkZWZhdWx0XG5cIFwgbGRhcF9wYXNzOlwgCg==' | base64 -d)$(echo '{{ ldap_admin_password }}')" \
+         {{ project_base }}/{{ project_name }}/shared/config/secrets.yml
