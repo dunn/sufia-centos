@@ -1,9 +1,19 @@
 ---
-- name: download openjpg source
-  get_url:
-    url: https://downloads.sourceforge.net/project/openjpeg.mirror/{{ openjpg_ver }}/openjpeg-{{ openjpg_ver }}.tar.gz
-    dest: "{{ magick_path }}/openjpeg-{{ openjpg_ver }}.tar.gz"
-    sha256sum: "{{ openjpg_256 }}"
+- name: download openjpeg source
+  command: curl -L https://downloads.sourceforge.net/project/openjpeg.mirror/{{ openjpg_ver }}/openjpeg-{{ openjpg_ver }}.tar.gz \
+           -o "{{ magick_path }}/openjpeg-{{ openjpg_ver }}.tar.gz"
+  args:
+    creates: "{{ magick_path }}/openjpeg-{{ openjpg_ver }}.tar.gz"
+
+- name: checksum openjpeg source
+  command: sha256sum openjpeg-{{ openjpg_ver }}.tar.gz
+  args:
+    chdir: "{{ magick_path }}"
+  register: jpeg_checksum
+
+- name: verify openjpeg checksum
+  fail: msg="The openjpeg checksum is incorrect ({{ jpeg_checksum.stdout }} instead of {{ openjpg_256 }})"
+  when: jpeg_checksum.stdout != "{{ openjpeg_256 }} openjpeg-{{ openjpg_ver }}.tar.gz"
 
 - name: unzip openjpg source
   unarchive:
