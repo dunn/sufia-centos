@@ -7,10 +7,20 @@
   debug: var=user
 
 - name: download yasm source
-  get_url:
-    url: https://www.tortall.net/projects/yasm/releases/yasm-{{ yasm_ver }}.tar.gz
-    dest: "{{ install_path }}/yasm-{{ yasm_ver }}.tar.gz"
-    sha256sum: "{{ yasm_256 }}"
+  command: curl -L https://www.tortall.net/projects/yasm/releases/yasm-{{ yasm_ver }}.tar.gz \
+           -o "{{ install_path }}/yasm-{{ yasm_ver }}.tar.gz"
+  args:
+    creates: "{{ install_path }}/yasm-{{ yasm_ver }}.tar.gz"
+
+- name: checksum yasm source
+  command: sha256sum yasm-{{ fdk_ver }}.tar.gz
+  args:
+    chdir: "{{ install_path }}"
+  register: yasm_checksum
+
+- name: verify yasm checksum
+  fail: msg="The yasm checksum is incorrect ({{ yasm_checksum.stdout }} instead of {{ yasm_256 }})"
+  when: yasm_checksum.stdout != "{{ yasm_256 }} yasm-{{ yasm_ver }}.tar.gz"
 
 - name: unpack yasm source
   unarchive:

@@ -1,9 +1,19 @@
 ---
 - name: download libvpx source
-  get_url:
-    url: https://github.com/webmproject/libvpx/archive/v{{ vpx_ver }}.tar.gz
-    dest: "{{ install_path }}/libvpx-{{ vpx_ver }}.tar.gz"
-    sha256sum: "{{ vpx_256 }}"
+  command: curl -L https://github.com/webmproject/libvpx/archive/v{{ vpx_ver }}.tar.gz \
+           -o "{{ install_path }}/libvpx-{{ vpx_ver }}.tar.gz"
+  args:
+    creates: "{{ install_path }}/libvpx-{{ vpx_ver }}.tar.gz"
+
+- name: checksum libvpx source
+  command: sha256sum libvpx-{{ vpx_ver }}.tar.gz
+  args:
+    chdir: "{{ install_path }}"
+  register: vpx_checksum
+
+- name: verify libvpx checksum
+  fail: msg="The libvpx checksum is incorrect ({{ vpx_checksum.stdout }} instead of {{ vpx_256 }})"
+  when: vpx_checksum.stdout != "{{ vpx_256 }} vpx-{{ vpx_ver }}.tar.gz"
 
 - name: unpack libvpx
   unarchive:

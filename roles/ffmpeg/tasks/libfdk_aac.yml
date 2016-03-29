@@ -1,10 +1,19 @@
 ---
 - name: download fdk-aac source
-  get_url:
-    url: https://downloads.sourceforge.net/project/opencore-amr/fdk-aac/fdk-aac-{{ fdk_ver }}.tar.gz
-    sha256sum: "{{ fdk_256 }}"
-    dest: "{{ install_path }}/fdk-aac-{{ fdk_ver }}.tar.gz"
-    force: yes
+  command: curl -L https://downloads.sourceforge.net/project/opencore-amr/fdk-aac/fdk-aac-{{ fdk_ver }}.tar.gz \
+           -o "{{ install_path }}/fdk-aac-{{ fdk_ver }}.tar.gz"
+  args:
+    creates: "{{ install_path }}/fdk-aac-{{ fdk_ver }}.tar.gz"
+
+- name: checksum fdk-aac source
+  command: sha256sum fdk-aac-{{ fdk_ver }}.tar.gz
+  args:
+    chdir: "{{ install_path }}"
+  register: fdk_checksum
+
+- name: verify fdk-aac checksum
+  fail: msg="The fdk-aac checksum is incorrect ({{ fdk_checksum.stdout }} instead of {{ fdk_256 }})"
+  when: fdk_checksum.stdout != "{{ fdk_256 }} fdk-aac-{{ fdk_ver }}.tar.gz"
 
 - name: unpack fdk-aac source
   unarchive:
