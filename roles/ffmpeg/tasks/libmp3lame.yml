@@ -1,31 +1,42 @@
 ---
 - name: download libmp3lame source
-  get_url:
-    url: https://downloads.sourceforge.net/sourceforge/lame/lame-3.99.5.tar.gz
-    dest: "{{ ffmpeg_path }}/lame-3.99.5.tar.gz"
+  command: curl -L https://downloads.sourceforge.net/sourceforge/lame/lame-{{ lame_ver }}.tar.gz \
+           -o "{{ ffmpeg_path }}/lame-{{ lame_ver }}.tar.gz"
+  args:
+    creates: "{{ ffmpeg_path }}/lame-{{ lame_ver }}.tar.gz"
+
+- name: checksum lame source
+  command: sha256sum lame-{{ lame_ver }}.tar.gz
+  args:
+    chdir: "{{ ffmpeg_path }}"
+  register: lame_checksum
+
+- name: verify lame checksum
+  fail: msg="The libmp3lame checksum is incorrect ({{ lame_checksum.stdout }} instead of {{ lame_256 }})"
+  when: lame_checksum.stdout != "{{ lame_256 }} lame-{{ lame_ver }}.tar.gz"
 
 - name: unzip libmp3lame source
   unarchive:
-    src: "{{ ffmpeg_path }}/lame-3.99.5.tar.gz"
+    src: "{{ ffmpeg_path }}/lame-{{ lame_ver }}.tar.gz"
     dest: "{{ ffmpeg_path }}/"
-    creates: "{{ ffmpeg_path }}/lame-3.99.5/compile.c"
+    creates: "{{ ffmpeg_path }}/lame-{{ lame_ver }}/compile.c"
     copy: no
 
 - name: configure libmp3lame
   command: ./configure --disable-shared --enable-nasm --prefix=/usr/local
   args:
-    chdir: "{{ ffmpeg_path }}/lame-3.99.5"
-    creates: "{{ ffmpeg_path }}/lame-3.99.5/Makefile"
+    chdir: "{{ ffmpeg_path }}/lame-{{ lame_ver }}"
+    creates: "{{ ffmpeg_path }}/lame-{{ lame_ver }}/Makefile"
 
 - name: make libmp3lame
   command: make
   args:
-    chdir: "{{ ffmpeg_path }}/lame-3.99.5"
+    chdir: "{{ ffmpeg_path }}/lame-{{ lame_ver }}"
 
 - name: install libmp3lame
   become: yes
   command: make install
   args:
-    chdir: "{{ ffmpeg_path }}/lame-3.99.5"
+    chdir: "{{ ffmpeg_path }}/lame-{{ lame_ver }}"
 
 - include: ldconfig.yml
