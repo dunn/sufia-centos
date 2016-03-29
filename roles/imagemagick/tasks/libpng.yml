@@ -13,7 +13,7 @@
 
 - name: verify libpng checksum
   fail: msg="The libpng checksum is incorrect ({{ png_checksum.stdout }} instead of {{ libpng_256 }})"
-  when: png_checksum.stdout != "{{ png_256 }} libpng-{{ libpng_ver }}.tar.xz"
+  when: png_checksum.stdout != "{{ libpng_256 }}  libpng-{{ libpng_ver }}.tar.xz"
 
 - name: unzip libpng source
   unarchive:

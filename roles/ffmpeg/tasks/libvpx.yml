@@ -13,7 +13,7 @@
 
 - name: verify libvpx checksum
   fail: msg="The libvpx checksum is incorrect ({{ vpx_checksum.stdout }} instead of {{ vpx_256 }})"
-  when: vpx_checksum.stdout != "{{ vpx_256 }} vpx-{{ vpx_ver }}.tar.gz"
+  when: vpx_checksum.stdout != "{{ vpx_256 }}  libvpx-{{ vpx_ver }}.tar.gz"
 
 - name: unpack libvpx
   unarchive:

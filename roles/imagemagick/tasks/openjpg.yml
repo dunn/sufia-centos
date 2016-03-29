@@ -13,7 +13,7 @@
 
 - name: verify openjpeg checksum
   fail: msg="The openjpeg checksum is incorrect ({{ jpeg_checksum.stdout }} instead of {{ openjpg_256 }})"
-  when: jpeg_checksum.stdout != "{{ openjpeg_256 }} openjpeg-{{ openjpg_ver }}.tar.gz"
+  when: jpeg_checksum.stdout != "{{ openjpg_256 }}  openjpeg-{{ openjpg_ver }}.tar.gz"
 
 - name: unzip openjpg source
   unarchive:

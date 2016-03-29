@@ -13,7 +13,7 @@
 
 - name: verify fedora checksum
   fail: msg="The fedora checksum is incorrect ({{ fedora_checksum.stdout }} instead of {{ fedora_256 }})"
-  when: fedora_checksum.stdout != "{{ fedora_256 }} fcrepo-webapp-{{ fedora_ver }}.war"
+  when: fedora_checksum.stdout != "{{ fedora_256 }}  fcrepo-webapp-{{ fedora_ver }}.war"
 
 - name: make fedora data dir
   file: owner=tomcat group=tomcat state=directory path={{ project_base }}/fedora-data

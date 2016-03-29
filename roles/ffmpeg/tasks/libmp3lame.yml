@@ -13,7 +13,7 @@
 
 - name: verify lame checksum
   fail: msg="The libmp3lame checksum is incorrect ({{ lame_checksum.stdout }} instead of {{ lame_256 }})"
-  when: lame_checksum.stdout != "{{ lame_256 }} lame-{{ lame_ver }}.tar.gz"
+  when: lame_checksum.stdout != "{{ lame_256 }}  lame-{{ lame_ver }}.tar.gz"
 
 - name: unzip libmp3lame source
   unarchive:

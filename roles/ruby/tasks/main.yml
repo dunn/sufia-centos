@@ -24,7 +24,7 @@
 
 - name: verify Ruby checksum
   fail: msg="The Ruby checksum is incorrect ({{ ruby_checksum.stdout }} instead of {{ ruby_256 }})"
-  when: ruby_checksum.stdout != "{{ ruby_256 }} ruby-{{ ruby_ver }}.tar.gz"
+  when: ruby_checksum.stdout != "{{ ruby_256 }}  ruby-{{ ruby_ver }}.tar.gz"
 
 - name: unzip ruby file
   unarchive: src={{ install_path }}/ruby-{{ ruby_ver }}.tar.gz dest={{ install_path }}/ creates={{ install_path }}/ruby-{{ ruby_ver }}/compile.c copy=no

@@ -8,14 +8,14 @@
     creates: "{{ install_path }}/ffmpeg-{{ ffmpeg_ver }}.tar.bz2"
 
 - name: checksum ffmpeg tarball
-  command: sha256sum {{ install_path }}/ffmpeg-{{ ffmpeg_ver }}.tar.bz2
+  command: sha256sum ffmpeg-{{ ffmpeg_ver }}.tar.bz2
   args:
     chdir: "{{ install_path }}"
   register: ffmpeg_checksum
 
 - name: verify ffmpeg checksum
   fail: msg="The ffmpeg checksum is incorrect ({{ ffmpeg_checksum.stdout }} instead of {{ ffmpeg_256 }})"
-  when: ffmpeg_checksum.stdout != "{{ ffmpeg_256 }} ffmpeg-{{ ffmpeg_ver }}.tar.bz2"
+  when: ffmpeg_checksum.stdout != "{{ ffmpeg_256 }}  ffmpeg-{{ ffmpeg_ver }}.tar.bz2"
 
 - name: unpack ffmpeg
   unarchive:

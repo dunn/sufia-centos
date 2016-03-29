@@ -14,7 +14,7 @@
 
 - name: verify ImageMagick checksum
   fail: msg="The ImageMagick checksum is incorrect ({{ magick_checksum.stdout }} instead of {{ imagemagick_256 }})"
-  when: magick_checksum.stdout != "{{ imagemagick_256 }} ImageMagick-{{ imagemagick_ver }}.tar.xz"
+  when: magick_checksum.stdout != "{{ imagemagick_256 }}  ImageMagick-{{ imagemagick_ver }}.tar.xz"
 
 - name: unpack ImageMagick
   unarchive:

@@ -13,7 +13,7 @@
 
 - name: verify fdk-aac checksum
   fail: msg="The fdk-aac checksum is incorrect ({{ fdk_checksum.stdout }} instead of {{ fdk_256 }})"
-  when: fdk_checksum.stdout != "{{ fdk_256 }} fdk-aac-{{ fdk_ver }}.tar.gz"
+  when: fdk_checksum.stdout != "{{ fdk_256 }}  fdk-aac-{{ fdk_ver }}.tar.gz"
 
 - name: unpack fdk-aac source
   unarchive:
