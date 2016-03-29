@@ -11,10 +11,20 @@
   yum: name=ruby state=absent
 
 - name: download ruby
-  get_url: url=https://cache.ruby-lang.org/pub/ruby/{{ ruby_abi }}/ruby-{{ ruby_ver }}.tar.gz \
-           sha256sum={{ ruby_256 }}
-           owner={{ ansible_ssh_user }} group={{ ansible_ssh_user }} \
-           dest={{ install_path }}/ruby-{{ ruby_ver }}.tar.gz
+  command: curl -L https://cache.ruby-lang.org/pub/ruby/{{ ruby_abi }}/ruby-{{ ruby_ver }}.tar.gz \
+           -o {{ install_path }}/ruby-{{ ruby_ver }}.tar.gz
+  args:
+    creates: "{{ install_path }}/ruby-{{ ruby_ver }}.tar.gz"
+
+- name: checksum Ruby source
+  command: sha256sum ruby-{{ ruby_ver }}.tar.gz
+  args:
+    chdir: "{{ install_path }}"
+  register: ruby_checksum
+
+- name: verify Ruby checksum
+  fail: msg="The Ruby checksum is incorrect ({{ ruby_checksum.stdout }} instead of {{ ruby_256 }})"
+  when: ruby_checksum.stdout != "{{ ruby_256 }} ruby-{{ ruby_ver }}.tar.gz"
 
 - name: unzip ruby file
   unarchive: src={{ install_path }}/ruby-{{ ruby_ver }}.tar.gz dest={{ install_path }}/ creates={{ install_path }}/ruby-{{ ruby_ver }}/compile.c copy=no
