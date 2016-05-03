@@ -1,0 +1,7 @@
+# Ignore Vagrant files
+/.vagrant
+
+# Ignore provisioning files
+/*.cfg
+/*.retry
+/hosts
