@@ -14,6 +14,8 @@ Vagrant.configure(2) do |config|
   config.vm.network 'forwarded_port', guest: 80, host: 8484 # apache
   config.vm.network 'forwarded_port', guest: 8080, host: 2424 # tomcat
 
+  config.vm.synced_folder '../../', '/vagrant'
+
   # Provider-specific configuration for VirtualBox:
   config.vm.provider 'virtualbox' do |vb|
     # Display the VirtualBox GUI when booting the machine?
