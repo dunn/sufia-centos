@@ -8,7 +8,7 @@
 
 - name: clone adrl-dm repository to {{ project_base }}/ingest/
   git:
-    repo: https://{{ ad_git_user }}:{{ ad_git_pass }}@stash.library.ucsb.edu/scm/cms/adrl-dm.git
+    repo: "https://{{ ad_git_user }}:{{ ad_git_pass }}@stash.library.ucsb.edu/scm/cms/adrl-dm.git"
     dest: "{{ project_base }}/ingest/metadata/adrl-dm"
     force: yes
     recursive: no
